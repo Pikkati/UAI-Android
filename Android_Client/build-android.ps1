@@ -1,10 +1,9 @@
 <#
-Build script for Android client (React Native / Gradle / Android Studio style).
+Build script for Android client (Kivy / Buildozer).
 Usage:
     .\build-android.ps1 -Configuration Release
 
-This script will try to run Gradle wrapper if present under Android_Client/android/gradlew.
-If not found, it will try `./gradlew` at repository root.
+This script will use Buildozer to build the Kivy Android app.
 #>
 param(
     [string]$Configuration = "Release"
@@ -16,17 +15,26 @@ Push-Location $ScriptDir
 
 Write-Host "Starting Android client build (Configuration=$Configuration)..."
 
-$gradleWrapper = Join-Path $ScriptDir "android\gradlew"
-$rootGradle = Join-Path (Resolve-Path "..").Path "gradlew"
+# Check if buildozer is installed
+if (-not (Get-Command buildozer -ErrorAction SilentlyContinue)) {
+    Write-Host "Buildozer not found. Installing..."
+    pip install buildozer
+}
 
-if (Test-Path $gradleWrapper) {
-    Write-Host "Using gradle wrapper at $gradleWrapper"
-    & "$gradleWrapper" -p android assemble$Configuration
-} elseif (Test-Path $rootGradle) {
-    Write-Host "Using root gradle wrapper at $rootGradle"
-    & "$rootGradle" -p android assemble$Configuration
+# Check if buildozer.spec exists
+$specFile = Join-Path $ScriptDir "buildozer.spec"
+if (-not (Test-Path $specFile)) {
+    Write-Error "buildozer.spec not found in $ScriptDir"
+    Pop-Location
+    exit 1
+}
+
+# Build the Android APK
+Write-Host "Building Android APK with Buildozer..."
+if ($Configuration -eq "Release") {
+    & buildozer android release
 } else {
-    Write-Warning "No gradle wrapper found. Make sure Android project is present."
+    & buildozer android debug
 }
 
 Pop-Location

@@ -135,6 +135,7 @@ class TestableMobileClient:
     def start_session(self, user_id):
         """Start user session"""
         if not user_id:
+            self.status_text = "Please enter a valid user ID"
             return False
 
         try:
@@ -145,9 +146,12 @@ class TestableMobileClient:
             )
             if response.status_code == 200:
                 self.user_id = user_id
+                self.status_text = "Session started successfully"
                 return True
+            else:
+                self.status_text = "Failed to start session - server error"
         except:
-            pass
+            self.status_text = "Failed to start session - offline mode"
         return False
 
     def sync_data(self, dt=None):
@@ -163,17 +167,27 @@ class TestableMobileClient:
                     json={"user_id": self.user_id},
                     timeout=10
                 )
-                return response.status_code == 200
+                if response.status_code == 200:
+                    self.status_text = "Data synchronized successfully"
+                    return True
+                else:
+                    self.status_text = "Data sync failed"
+                    return False
             else:
                 # Offline mode - just return success for now
+                self.status_text = "Data sync skipped - offline mode"
                 return True
         except:
+            self.status_text = "Data sync failed - connection error"
             return False
 
-    def use_ai_feature(self, feature_type, data):
+    def use_ai_feature(self, feature_type, data=None):
         """Use AI feature"""
         if not self.user_id:
             return None
+
+        if data is None:
+            data = {"test": "data"}
 
         try:
             if self.connected:
@@ -206,7 +220,7 @@ class TestMobileClient(unittest.TestCase):
         self.assertFalse(self.client.connected)
         self.assertFalse(self.client.offline_mode)
 
-    @patch('requests.get')
+    @patch('test_mobile_client.requests.get')
     def test_connection_check_success(self, mock_get):
         """Test successful connection check"""
         mock_response = Mock()
@@ -221,7 +235,7 @@ class TestMobileClient(unittest.TestCase):
         self.assertTrue(self.client.connected)
         self.assertIn("Connected", self.client.status_text)
 
-    @patch('requests.get')
+    @patch('test_mobile_client.requests.get')
     def test_connection_check_failure(self, mock_get):
         """Test failed connection check"""
         mock_get.side_effect = requests.exceptions.RequestException()

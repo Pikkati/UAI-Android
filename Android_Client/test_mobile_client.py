@@ -152,6 +152,7 @@ class TestableMobileClient:
                 self.status_text = "Failed to start session - server error"
         except:
             self.status_text = "Failed to start session - offline mode"
+            self.offline_mode = True
         return False
 
     def sync_data(self, dt=None):
@@ -184,6 +185,7 @@ class TestableMobileClient:
     def use_ai_feature(self, feature_type, data=None):
         """Use AI feature"""
         if not self.user_id:
+            self.status_text = "Please start a session first"
             return None
 
         if data is None:
@@ -197,9 +199,11 @@ class TestableMobileClient:
                     timeout=15
                 )
                 if response.status_code == 200:
+                    self.status_text = "AI Feature used successfully"
                     return response.json()
             else:
                 # Offline AI processing (simplified)
+                self.status_text = "AI Feature used (offline mode)"
                 return {"result": "Offline AI response", "feature": feature_type}
         except:
             return None
@@ -265,7 +269,7 @@ class TestMobileClient(unittest.TestCase):
 
         self.client.start_session("test_user")
 
-        self.assertIn("Offline", self.client.status_text)
+        self.assertIn("offline", self.client.status_text)
         self.assertTrue(self.client.offline_mode)
 
     def test_start_session_empty_user(self):

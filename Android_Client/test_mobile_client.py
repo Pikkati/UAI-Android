@@ -112,8 +112,21 @@ class TestMobileClient(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures"""
-        # Create client instance with mocked kivy components
-        self.client = MobileClient()
+        # Mock the entire MobileClient to avoid GUI initialization
+        with patch('mobile_client.MobileClient') as mock_client_class:
+            mock_instance = MagicMock()
+            mock_instance.api_base = "http://localhost:8003"
+            mock_instance.user_id = None
+            mock_instance.connected = False
+            mock_instance.offline_mode = False
+            mock_instance.status_text = "Initializing..."
+            # Mock methods to avoid infinite loops and GUI operations
+            mock_instance.check_connection = MagicMock()
+            mock_instance.sync_data = MagicMock()
+            mock_instance.build_ui = MagicMock()
+            mock_client_class.return_value = mock_instance
+            self.client = MobileClient()
+
         # Reset client state for each test
         self.client.api_base = "http://localhost:8003"
         self.client.user_id = None

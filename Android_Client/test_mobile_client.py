@@ -23,6 +23,87 @@ sys.modules['kivy.uix.gridlayout'] = MagicMock()
 sys.modules['kivy.clock'] = MagicMock()
 sys.modules['kivy.properties'] = MagicMock()
 
+# Mock kivy classes with proper instantiation
+class MockBoxLayout(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.orientation = kwargs.get('orientation', 'vertical')
+        self.size_hint_y = kwargs.get('size_hint_y', 1)
+        self.size_hint_x = kwargs.get('size_hint_x', 1)
+        self.spacing = kwargs.get('spacing', 0)
+        self.padding = kwargs.get('padding', 0)
+        self.cols = kwargs.get('cols', 1)
+        self.height = kwargs.get('height', None)
+        self.children = []
+
+    def add_widget(self, widget):
+        self.children.append(widget)
+
+    def bind(self, **kwargs):
+        pass
+
+class MockLabel(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text = kwargs.get('text', '')
+        self.size_hint_x = kwargs.get('size_hint_x', 1)
+        self.size_hint_y = kwargs.get('size_hint_y', 1)
+        self.bold = kwargs.get('bold', False)
+
+class MockButton(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text = kwargs.get('text', '')
+        self.size_hint_y = kwargs.get('size_hint_y', 1)
+
+    def bind(self, **kwargs):
+        pass
+
+class MockTextInput(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hint_text = kwargs.get('hint_text', '')
+        self.multiline = kwargs.get('multiline', False)
+        self.size_hint_y = kwargs.get('size_hint_y', 1)
+
+class MockScrollView(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.size_hint_y = kwargs.get('size_hint_y', 1)
+
+    def add_widget(self, widget):
+        pass
+
+class MockGridLayout(MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cols = kwargs.get('cols', 1)
+        self.spacing = kwargs.get('spacing', 0)
+        self.padding = kwargs.get('padding', 0)
+        self.size_hint_y = kwargs.get('size_hint_y', None)
+        self.children = []
+
+    def add_widget(self, widget):
+        self.children.append(widget)
+
+    def bind(self, **kwargs):
+        pass
+
+# Assign mock classes to modules
+sys.modules['kivy.uix.boxlayout'].BoxLayout = MockBoxLayout
+sys.modules['kivy.uix.label'].Label = MockLabel
+sys.modules['kivy.uix.button'].Button = MockButton
+sys.modules['kivy.uix.textinput'].TextInput = MockTextInput
+sys.modules['kivy.uix.scrollview'].ScrollView = MockScrollView
+sys.modules['kivy.uix.gridlayout'].GridLayout = MockGridLayout
+
+# Mock Clock and properties
+sys.modules['kivy.clock'].Clock = MagicMock()
+sys.modules['kivy.clock'].Clock.schedule_interval = MagicMock()
+
+sys.modules['kivy.properties'].StringProperty = MagicMock(return_value="test")
+sys.modules['kivy.properties'].BooleanProperty = MagicMock(return_value=False)
+
 # Now import the mobile client
 from mobile_client import MobileClient, UAIAndroidApp
 

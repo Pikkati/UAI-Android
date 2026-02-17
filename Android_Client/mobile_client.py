@@ -12,22 +12,25 @@ Features:
 """
 
 import kivy
-kivy.require('2.0.0')
 
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.clock import Clock
-from kivy.properties import StringProperty, BooleanProperty
-import requests
+kivy.require("2.0.0")
+
 import json
 import threading
 import time
 from datetime import datetime
+
+import requests
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.properties import BooleanProperty, StringProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
+
 
 class MobileClient(BoxLayout):
     """Main mobile client interface"""
@@ -38,7 +41,7 @@ class MobileClient(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.orientation = 'vertical'
+        self.orientation = "vertical"
         self.api_base = "http://localhost:8003"
         self.user_id = None
 
@@ -74,7 +77,7 @@ class MobileClient(BoxLayout):
         self.status_label = Label(text=self.status_text, size_hint_x=0.7)
         self.connection_indicator = Label(
             text="🔴" if not self.connected else "🟢",
-            size_hint_x=0.3
+            size_hint_x=0.3,
         )
         status_bar.add_widget(self.status_label)
         status_bar.add_widget(self.connection_indicator)
@@ -83,10 +86,10 @@ class MobileClient(BoxLayout):
         # Main content area
         content = ScrollView(size_hint_y=0.8)
         content_layout = GridLayout(cols=1, spacing=10, padding=10, size_hint_y=None)
-        content_layout.bind(minimum_height=content_layout.setter('height'))
+        content_layout.bind(minimum_height=content_layout.setter("height"))
 
         # User session management
-        session_section = BoxLayout(orientation='vertical', size_hint_y=None, height=100)
+        session_section = BoxLayout(orientation="vertical", size_hint_y=None, height=100)
         session_title = Label(text="User Session", size_hint_y=0.3, bold=True)
         session_section.add_widget(session_title)
 
@@ -100,7 +103,7 @@ class MobileClient(BoxLayout):
         content_layout.add_widget(session_section)
 
         # AI Features section
-        ai_section = BoxLayout(orientation='vertical', size_hint_y=None, height=150)
+        ai_section = BoxLayout(orientation="vertical", size_hint_y=None, height=150)
         ai_title = Label(text="AI Features", size_hint_y=0.2, bold=True)
         ai_section.add_widget(ai_title)
 
@@ -117,7 +120,7 @@ class MobileClient(BoxLayout):
         content_layout.add_widget(ai_section)
 
         # Data Sync section
-        sync_section = BoxLayout(orientation='vertical', size_hint_y=None, height=100)
+        sync_section = BoxLayout(orientation="vertical", size_hint_y=None, height=100)
         sync_title = Label(text="Data Synchronization", size_hint_y=0.3, bold=True)
         sync_section.add_widget(sync_title)
 
@@ -128,7 +131,7 @@ class MobileClient(BoxLayout):
         content_layout.add_widget(sync_section)
 
         # Offline queue status
-        queue_section = BoxLayout(orientation='vertical', size_hint_y=None, height=80)
+        queue_section = BoxLayout(orientation="vertical", size_hint_y=None, height=80)
         queue_title = Label(text="Offline Queue", size_hint_y=0.4, bold=True)
         queue_section.add_widget(queue_title)
 
@@ -156,8 +159,8 @@ class MobileClient(BoxLayout):
                 data={
                     "user_id": user_id,
                     "device_type": "mobile",
-                    "platform": "android"
-                }
+                    "platform": "android",
+                },
             )
             if response.status_code == 200:
                 self.status_text = f"Session started for {user_id}"
@@ -170,7 +173,7 @@ class MobileClient(BoxLayout):
 
     def use_ai_feature(self, feature_type):
         """Use mobile AI feature"""
-        if not hasattr(self, 'user_id'):
+        if not hasattr(self, "user_id"):
             self.status_text = "Please start a session first"
             return
 
@@ -181,8 +184,8 @@ class MobileClient(BoxLayout):
                     "user_id": self.user_id,
                     "device_id": f"android_{self.user_id}",
                     "feature_type": feature_type,
-                    "offline_mode": str(self.offline_mode).lower()
-                }
+                    "offline_mode": str(self.offline_mode).lower(),
+                },
             )
             if response.status_code == 200:
                 self.status_text = f"AI Feature used: {feature_type}"
@@ -193,7 +196,7 @@ class MobileClient(BoxLayout):
             # Queue for later sync
             self.queue_offline_action("ai_feature", {
                 "feature_type": feature_type,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             })
 
     def sync_data(self, dt=None):
@@ -206,11 +209,11 @@ class MobileClient(BoxLayout):
             response = requests.post(
                 f"{self.api_base}/mobile/sync",
                 data={
-                    'user_id': self.user_id,
-                    'data_type': 'periodic_sync',
-                    'data_payload': json.dumps({'timestamp': datetime.now().isoformat()}),
-                    'platform': 'android'
-                }
+                    "user_id": self.user_id,
+                    "data_type": "periodic_sync",
+                    "data_payload": json.dumps({"timestamp": datetime.now().isoformat()}),
+                    "platform": "android",
+                },
             )
             if response.status_code == 200:
                 self.status_text = "Data synchronized"
@@ -227,13 +230,13 @@ class MobileClient(BoxLayout):
 
     def check_offline_queue(self):
         """Check and process offline queue"""
-        if not hasattr(self, 'user_id'):
+        if not hasattr(self, "user_id"):
             return
 
         try:
             response = requests.get(f"{self.api_base}/mobile/offline/queue?user_id={self.user_id}")
             if response.status_code == 200:
-                queue = response.json().get('queue', [])
+                queue = response.json().get("queue", [])
                 self.queue_status.text = f"Queue: {len(queue)} items"
         except:
             pass
@@ -287,11 +290,11 @@ class UAIAndroidApp(App):
         """App shutdown"""
         print("UAI Android Client demo completed")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Check for demo mode via environment variable or command line
     import os
     import sys
-    demo_mode = os.environ.get('MOBILE_DEMO_MODE') == 'true' or "--demo" in sys.argv or "-d" in sys.argv
+    demo_mode = os.environ.get("MOBILE_DEMO_MODE") == "true" or "--demo" in sys.argv or "-d" in sys.argv
 
     print(f"Demo mode: {demo_mode}")  # Debug output
 
@@ -301,16 +304,16 @@ if __name__ == '__main__':
         print("=========================================")
 
         # Set headless backend for kivy to prevent GUI
-        os.environ['KIVY_WINDOW'] = 'headless'
+        os.environ["KIVY_WINDOW"] = "headless"
 
         # Import kivy here to use headless mode
         import kivy
-        kivy.require('2.0.0')
+        kivy.require("2.0.0")
 
         from kivy.config import Config
-        Config.set('graphics', 'width', '1')
-        Config.set('graphics', 'height', '1')
-        Config.set('kivy', 'window_icon', '')
+        Config.set("graphics", "width", "1")
+        Config.set("graphics", "height", "1")
+        Config.set("kivy", "window_icon", "")
 
         client = MobileClient()
         print("🎯 Starting Android Mobile Client Demo...")
@@ -332,5 +335,5 @@ if __name__ == '__main__':
         sys.exit(0)
     else:
         # Run GUI app
-        os.environ['KIVY_NO_ARGS'] = '1'
+        os.environ["KIVY_NO_ARGS"] = "1"
         UAIAndroidApp(demo_mode=demo_mode).run()

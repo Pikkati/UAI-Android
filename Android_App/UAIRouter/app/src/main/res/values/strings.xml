@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">UAI Router</string>
-    <string name="title_home">Home</string>
-    <string name="title_claude">Claude Sonnet</string>
-    <string name="prompt_hint">Enter your prompt...</string>
-    <string name="send">Send</string>
-    <string name="view_usage">View Usage Stats</string>
-</resources>
